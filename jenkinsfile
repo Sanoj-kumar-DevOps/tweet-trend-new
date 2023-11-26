@@ -11,14 +11,24 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh 'mvn clean deploy'
+                    sh 'mvn clean deploy -Dmaven.test.skip=true'
                 }
             }
         }
+
+        stage('Test') {
+            steps {
+                echo "------- unit test started --------"
+                sh 'mvn surefire-report:report'
+                echo "------- unit test completed --------"
+            }
+        }
+
         stage('SonarQube analysis') {
             environment {
                 scannerHome = tool 'sonar-scanner'
             }
+
             steps {
                 script {
                     withSonarQubeEnv('sonarqube-server') {
