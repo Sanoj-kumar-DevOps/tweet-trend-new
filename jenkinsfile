@@ -1,0 +1,20 @@
+pipeline {
+    agent {
+        node {
+            label 'maven-slave'
+        }
+    }
+    environment {
+        PATH = "/opt/apache-maven-3.9.5/bin:$PATH"
+    }
+    stages {
+        stage('build') {
+            steps {
+                script {
+                    sh 'mvn clean deploy'
+                }
+            }
+        }
+    }
+}
+
