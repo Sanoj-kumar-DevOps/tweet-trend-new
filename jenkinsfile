@@ -32,12 +32,9 @@ pipeline {
             steps {
                 script {
                     echo '<--------------- Jar Publish Started --------------->'
-                    
-                    // Import ArtifactoryServer class
                     def server = Artifactory.newServer url: registry + "/artifactory", credentialsId: "artifact-cred"
                     def properties = "buildid=${env.BUILD_ID};commitid=${GIT_COMMIT}"
                     
-                    // Use triple-double-quotes for multi-line string
                     def uploadSpec = """
                     {
                         "files": [
