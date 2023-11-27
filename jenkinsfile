@@ -1,13 +1,16 @@
 def registry = 'https://sunny007.jfrog.io'
+
 pipeline {
     agent {
         node {
             label 'maven-slave'
         }
     }
+
     environment {
         PATH = "/opt/apache-maven-3.9.5/bin:$PATH"
     }
+
     stages {
         stage('Build') {
             steps {
@@ -29,10 +32,12 @@ pipeline {
             steps {
                 script {
                     echo '<--------------- Jar Publish Started --------------->'
-                    // Import Artifactory class
-                    def Artifactory = org.jfrog.hudson.pipeline.common.types.ArtifactoryServer
-                    def server = Artifactory.newServer url: registry + "/artifactory", credentialsId: "artifact-cred"
+                    
+                    // Import ArtifactoryServer class
+                    def ArtifactoryServer = org.jfrog.hudson.pipeline.common.types.ArtifactoryServer
+                    def server = new ArtifactoryServer(url: registry + "/artifactory", credentialsId: "artifact-cred")
                     def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}"
+                    
                     // Use triple-double-quotes for multi-line string
                     def uploadSpec = """{
                         "files": [
@@ -45,13 +50,16 @@ pipeline {
                             }
                         ]
                     }"""
+                    
                     def buildInfo = server.upload(uploadSpec)
                     buildInfo.env.collect()
                     server.publishBuildInfo(buildInfo)
+                    
                     echo '<--------------- Jar Publish Ended --------------->'
                 }
             }
         }
+
         stage('SonarQube analysis') {
             environment {
                 scannerHome = tool 'sonar-scanner'
