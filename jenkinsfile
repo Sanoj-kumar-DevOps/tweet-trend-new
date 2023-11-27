@@ -34,25 +34,26 @@ pipeline {
                     echo '<--------------- Jar Publish Started --------------->'
                     
                     // Import ArtifactoryServer class
-                    def ArtifactoryServer = org.jfrog.hudson.pipeline.common.types.ArtifactoryServer
-                    def server = new ArtifactoryServer(url: registry + "/artifactory", credentialsId: "artifact-cred")
-                    def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}"
+                    def server = Artifactory.newServer url: registry + "/artifactory", credentialsId: "artifact-cred"
+                    def properties = "buildid=${env.BUILD_ID};commitid=${GIT_COMMIT}"
                     
                     // Use triple-double-quotes for multi-line string
-                    def uploadSpec = """{
+                    def uploadSpec = """
+                    {
                         "files": [
                             {
-                                "pattern": "jarstaging/(*)",
+                                "pattern": "jarstaging/*",
                                 "target": "libs-release-local/{1}",
                                 "flat": "false",
                                 "props": "${properties}",
                                 "exclusions": ["*.sha1", "*.md5"]
                             }
                         ]
-                    }"""
+                    }
+                    """
                     
-                    def buildInfo = server.upload(uploadSpec)
-                    buildInfo.env.collect()
+                    def buildInfo = Artifactory.newBuildInfo()
+                    server.upload(uploadSpec, buildInfo)
                     server.publishBuildInfo(buildInfo)
                     
                     echo '<--------------- Jar Publish Ended --------------->'
