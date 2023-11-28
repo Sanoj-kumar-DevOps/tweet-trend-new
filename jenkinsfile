@@ -59,6 +59,18 @@ pipeline {
             }
         }
 
+         stage("Docker Publish") {
+            steps {
+                script {
+                    echo '<--------------- Docker Publish Started --------------->'  
+                    docker.withRegistry(registry, 'artifact-cred'){
+                        app.push()
+                    }    
+                    echo '<--------------- Docker Publish Ended --------------->'  
+                }
+            }
+        }
+
         stage('SonarQube analysis') {
             environment {
                 scannerHome = tool 'sonar-scanner'
@@ -69,18 +81,6 @@ pipeline {
                     withSonarQubeEnv('sonarqube-server') {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
-                }
-            }
-        }
-
-        stage("Docker Publish") {
-            steps {
-                script {
-                    echo '<--------------- Docker Publish Started --------------->'  
-                    docker.withRegistry(registry, 'artifact-cred'){
-                        app.push()
-                    }    
-                    echo '<--------------- Docker Publish Ended --------------->'  
                 }
             }
         }
