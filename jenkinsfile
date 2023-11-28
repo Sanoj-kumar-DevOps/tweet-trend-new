@@ -1,5 +1,6 @@
 def registry = 'https://sunny007.jfrog.io'
 def imageName = 'valaxy-docker-local/ttrend' // This should be the name of your Docker image
+def version = '2.0.2'
 
 pipeline {
     agent {
@@ -59,13 +60,23 @@ pipeline {
             }
         }
 
+        stage('Docker Build') {
+            steps {
+                script {
+                    echo '<--------------- Docker Build Started --------------->'
+                    // Assuming Dockerfile is in the current directory
+                    def app = docker.build("${imageName}:${version}")
+                    echo '<--------------- Docker Build Ended --------------->'
+                }
+            }
+        }
+
         stage("Docker Publish") {
             steps {
                 script {
                     echo '<--------------- Docker Publish Started --------------->'  
                     docker.withRegistry(registry, 'artifact-cred') {
-                        // Make sure the Docker image is built before this step.
-                        docker.image(imageName).push()
+                        docker.image("${imageName}:${version}").push()
                     }    
                     echo '<--------------- Docker Publish Ended --------------->'  
                 }
