@@ -1,4 +1,5 @@
 def registry = 'https://sunny007.jfrog.io'
+def imageName = 'https://sunny007.jfrog.io/valaxy-docker-local/ttrend'
 
 pipeline {
     agent {
@@ -68,6 +69,18 @@ pipeline {
                     withSonarQubeEnv('sonarqube-server') {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
+                }
+            }
+        }
+
+        stage("Docker Publish") {
+            steps {
+                script {
+                    echo '<--------------- Docker Publish Started --------------->'  
+                    docker.withRegistry(registry, 'artifact-cred'){
+                        app.push()
+                    }    
+                    echo '<--------------- Docker Publish Ended --------------->'  
                 }
             }
         }
