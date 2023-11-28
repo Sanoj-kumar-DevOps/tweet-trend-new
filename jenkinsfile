@@ -1,5 +1,5 @@
 def registry = 'https://sunny007.jfrog.io'
-def imageName = 'https://sunny007.jfrog.io/valaxy-docker-local/ttrend'
+def imageName = 'valaxy-docker-local/ttrend' // This should be the name of your Docker image
 
 pipeline {
     agent {
@@ -59,18 +59,21 @@ pipeline {
             }
         }
 
-         stage("Docker Publish") {
+        stage("Docker Publish") {
             steps {
                 script {
                     echo '<--------------- Docker Publish Started --------------->'  
-                    docker.withRegistry(registry, 'artifact-cred'){
-                        app.push()
+                    docker.withRegistry(registry, 'artifact-cred') {
+                        // Make sure the Docker image is built before this step.
+                        docker.image(imageName).push()
                     }    
                     echo '<--------------- Docker Publish Ended --------------->'  
                 }
             }
         }
 
+        // Uncomment this section if you want to include SonarQube analysis
+        /*
         stage('SonarQube analysis') {
             environment {
                 scannerHome = tool 'sonar-scanner'
@@ -84,5 +87,6 @@ pipeline {
                 }
             }
         }
+        */
     }
 }
